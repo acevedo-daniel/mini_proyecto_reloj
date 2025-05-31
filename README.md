@@ -1,5 +1,4 @@
 # mini_proyecto_reloj
-modelo de reloj digital
 import tkinter as tk
 import time
 
