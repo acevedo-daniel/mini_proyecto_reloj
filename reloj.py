@@ -1,4 +1,3 @@
-# mini_proyecto_reloj
 import tkinter as tk
 import time
 
