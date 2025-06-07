@@ -1,88 +1,126 @@
 import tkinter as tk
-import tkinter.ttk as ttk # Importamos ttk para el Notebook y los estilos
+import tkinter.ttk as ttk
+import time
 
 class AdvancedClock:
     def __init__(self, master):
-        """
-        Constructor de la aplicación AdvancedClock.
-        Configura la ventana principal y aplica estilos personalizados a las pestañas
-        (ttk.Notebook) para un diseño plano y moderno.
-        """
         self.master = master
-        master.title('Advanced Clock') # Título de la ventana
-        master.geometry('450x400')   # Tamaño inicial de la ventana (ancho x alto)
-                                     # Ancho ajustado para que las pestañas se vean más centradas.
-        master.resizable(False, False) # Impide que el usuario redimensione la ventana
+        master.title('Advanced Clock')
+        master.geometry('450x400')
+        master.resizable(False, False)
 
-        # --- Configuración de Estilos para ttk.Notebook (Pestañas) ---
-        # Usamos ttk.Style para personalizar la apariencia de los widgets temáticos.
         style = ttk.Style()
-        style.theme_use('default') # Establece el tema base.
-
-        # Estilo general del contenedor del Notebook (el área que rodea las pestañas y el contenido)
-        style.configure('TNotebook', 
-                        background='#003366', # Color de fondo del Notebook (azul oscuro)
-                        borderwidth=0,        # Sin borde alrededor del Notebook principal
-                        padding=[5, 5, 5, 0]  # Espacio interno del Notebook (izq, arr, der, ab)
-                       )
+        style.theme_use('default') 
         
-        # Estilo de las Pestañas individuales (las etiquetas "Reloj", "Alarma", etc.)
-        style.configure('TNotebook.Tab', 
-                        background='#003366',    # Fondo de las pestañas no seleccionadas (azul oscuro)
-                        foreground='white',     # Color del texto de las pestañas no seleccionadas
-                        padding=[40, 15],       # Relleno interno de cada pestaña [horizontal, vertical]
-                                                # Esto hace que las pestañas sean más anchas y altas.
-                        font=('Helvetica', 12, 'bold'), # Fuente del texto de las pestañas (se recomienda 'Helvetica' o 'Arial')
-                        relief='flat',          # Elimina el efecto 3D de botón de las pestañas (las hace planas)
-                        borderwidth=0,          # Elimina el borde visible de las pestañas
-                        bordercolor='#003366',  # Color del borde (igual que el fondo para que se "funda")
-                        focuscolor='#003366'    # Color del contorno de enfoque (igual que el fondo para que sea invisible)
-                       )
-        
-        # Mapeo de estilos: Define cómo cambian las propiedades de las pestañas en diferentes estados
+        # Estilos del notebook y pestañas
+        style.configure('TNotebook', background='#003366', borderwidth=0, padding=[5, 5, 5, 0])
+        style.configure('TNotebook.Tab', background='#003366', foreground='white',
+                        padding=[40, 15], font=('Helvetica', 12, 'bold'),
+                        relief='flat', borderwidth=0, bordercolor='#003366', focuscolor='#003366')
         style.map('TNotebook.Tab',
-            background=[('selected', '#FFD700'), # Fondo de la pestaña cuando está seleccionada (dorado)
-                        ('active', '#004488')],   # Fondo cuando el mouse está sobre la pestaña (azul más claro)
-            foreground=[('selected', 'black')],   # Color del texto de la pestaña seleccionada (negro)
-            bordercolor=[('selected', '#FFD700')] # Borde de la pestaña seleccionada coincide con su fondo
-        )
-        # --- Modificación Avanzada del Layout de la Pestaña ---
-        # Esta es la parte crucial para eliminar el "cuadro blanco" de enfoque.
-        # Redefine la estructura interna de cómo se dibuja una pestaña,
-        # eliminando el componente 'TNotebook.focus' que es el responsable de ese contorno.
+                  background=[('selected', '#FFD700'), ('active', '#004488')],
+                  foreground=[('selected', 'black')],
+                  bordercolor=[('selected', '#FFD700')])
+        
+        # Codigo importante para eliminar propiedades default de la plantilla.
         style.layout("TNotebook.Tab",
                      [("TNotebook.tab", {"sticky": "nswe", "children":
                                          [("TNotebook.padding", {"sticky": "nswe", "children":
                                                                  [("TNotebook.label", {"sticky": ""})]
                                                                 })]
-                                        })]
-                    )
-        
-        # --- Creación del Widget Notebook (Pestañas) ---
+                                        })])
+
+        # Crear pestañas
         self.notebook = ttk.Notebook(master)
-        # Empaqueta el notebook para que ocupe todo el espacio disponible en la ventana
         self.notebook.pack(expand=True, fill='both', padx=5, pady=5)
 
-        # --- Creación de los Frames (Contenedores) para cada Pestaña ---
-        # Cada Frame es el contenido de una pestaña. Se les asigna un color de fondo claro.
-        self.clock_frame = tk.Frame(self.notebook, bg='#E0FFFF') # Azul muy claro
-        self.notebook.add(self.clock_frame, text='Reloj') # Añade el frame como una pestaña con el texto "Reloj"
+        self.clock_frame = tk.Frame(self.notebook, bg='#003366')
+        self.notebook.add(self.clock_frame, text='Reloj')
 
-        self.alarm_frame = tk.Frame(self.notebook, bg='#FFE0E0') # Rojo muy claro
+        self.alarm_frame = tk.Frame(self.notebook, bg='#003366')
         self.notebook.add(self.alarm_frame, text='Alarma')
 
-        self.stopwatch_frame = tk.Frame(self.notebook, bg='#E0FFE0') # Verde muy claro
-        self.notebook.add(self.stopwatch_frame, text='Cronómetro') 
+        self.stopwatch_frame = tk.Frame(self.notebook, bg='#003366')
+        self.notebook.add(self.stopwatch_frame, text='Cronómetro')
 
-        # --- Llamadas a Métodos de Configuración de Funcionalidades ---
-        # Estos métodos se implementarán en futuras fases para añadir los widgets
-        # y la lógica específica de cada función (reloj, alarma, cronómetro).
-        # self._setup_digital_clock()
-        # self._setup_alarm()
-        # self._setup_stopwatch()
+        # Variables del cronómetro
+        self.stopwatch_running = False
+        self.stopwatch_start_time = 0
+        self.stopwatch_elapsed_time = 0
+        self.stopwatch_job = None
 
-# --- Punto de Entrada de la Aplicación ---
+        self._setup_stopwatch()
+
+    def _setup_stopwatch(self):
+        # Pantalla del cronómetro
+        self.stopwatch_display = tk.Label(self.stopwatch_frame,
+                                          text="00:00:00.00",
+                                          font=('Helvetica', 50, 'bold'),
+                                          bg='#003366', fg='white')
+        self.stopwatch_display.pack(pady=50, expand=True)
+
+        # Botones
+        button_frame = tk.Frame(self.stopwatch_frame, bg='#003366')
+        button_frame.pack(pady=10)
+
+        self.start_button = tk.Button(button_frame, text="Iniciar", font=('Helvetica', 14),
+                                      command=self._start_stopwatch,
+                                      bg='#FFD700', fg='black', width=10,
+                                      relief='flat', bd=0)
+        self.start_button.grid(row=0, column=0, padx=10)
+
+        self.stop_button = tk.Button(button_frame, text="Parar", font=('Helvetica', 14),
+                                     command=self._stop_stopwatch,
+                                     bg='#FFD700', fg='black', width=10,
+                                     relief='flat', bd=0, state=tk.DISABLED)
+        self.stop_button.grid(row=0, column=1, padx=10)
+
+        self.reset_button = tk.Button(button_frame, text="Reiniciar", font=('Helvetica', 14),
+                                      command=self._reset_stopwatch,
+                                      bg='#FFD700', fg='black', width=10,
+                                      relief='flat', bd=0, state=tk.DISABLED)
+        self.reset_button.grid(row=0, column=2, padx=10)
+
+    # Funciones del Cronometro
+    def _start_stopwatch(self):
+        if not self.stopwatch_running:
+            self.stopwatch_running = True
+            self.stopwatch_start_time = time.time() - self.stopwatch_elapsed_time
+            self._update_stopwatch_display()
+            self.start_button.config(state=tk.DISABLED)
+            self.stop_button.config(state=tk.NORMAL)
+            self.reset_button.config(state=tk.NORMAL)
+
+    def _stop_stopwatch(self):
+        if self.stopwatch_running:
+            self.stopwatch_running = False
+            if self.stopwatch_job:
+                self.master.after_cancel(self.stopwatch_job)
+                self.stopwatch_job = None
+            self.stopwatch_elapsed_time = time.time() - self.stopwatch_start_time
+            self.start_button.config(state=tk.NORMAL)
+            self.stop_button.config(state=tk.DISABLED)
+
+    def _reset_stopwatch(self):
+        self._stop_stopwatch()
+        self.stopwatch_elapsed_time = 0
+        self.stopwatch_display.config(text="00:00:00.00")
+        self.start_button.config(state=tk.NORMAL)
+        self.reset_button.config(state=tk.DISABLED)
+
+    def _update_stopwatch_display(self):
+        if self.stopwatch_running:
+            current_time = time.time() - self.stopwatch_start_time
+            hours = int(current_time // 3600)
+            minutes = int((current_time % 3600) // 60)
+            seconds = int(current_time % 60)
+            milliseconds = int((current_time * 100) % 100)
+            formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:02d}.{milliseconds:02d}"
+            self.stopwatch_display.config(text=formatted_time)
+            self.stopwatch_job = self.master.after(10, self._update_stopwatch_display)
+
+# Inicia el programa
 if __name__ == '__main__':
-    root = tk.Tk() # Crea la ventana principal de Tkinter
-    app = AdvancedClock(root) # Crea una instancia de nuestra aplicación de reloj
-    root.mainloop() # Inicia el bucle principal de eventos de Tkinter, manteniendo la ventana abierta
+    root = tk.Tk()
+    app = AdvancedClock(root)
+    root.mainloop()
